@@ -1,7 +1,10 @@
 package spaceLab.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +17,9 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Customer implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,34 +28,27 @@ public class Customer implements UserDetails {
     private String name;
     private String email;
     private String password;
-
-    @Column(columnDefinition="DATE")
+    @Column(name = "date_of_birth", columnDefinition="DATE")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    private String address;
     private String phoneNumber;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer", cascade = CascadeType.ALL)
+    private double bonusPoints = 0;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     private List<Order> orders = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "invitation_id")  // Обязательное поле для связи с Invitation
-    private Invitation invitation;  // Связь с сущностью Invitation
-
     @Enumerated(EnumType.STRING)
     private Language language;
-
+    @ManyToOne
+    @JoinColumn(name = "invitation_id")
+    private Invitation invitation;
     @Column(name = "registration_date", columnDefinition="DATE")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate registrationDate;
-
     @Enumerated(EnumType.STRING)
     private CustomerStatus status;
-
     @OneToOne(mappedBy = "customer")
     private PasswordResetTokenCustomer passwordResetTokenCustomer;
-
-    // Реализация методов UserDetails
+    private boolean deleted = false;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));

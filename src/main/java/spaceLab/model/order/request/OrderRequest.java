@@ -1,5 +1,6 @@
 package spaceLab.model.order.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,9 @@ import java.util.List;
 public class OrderRequest implements Serializable {
     Long id;
     @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
     LocalDateTime dateTimeOfCreate;
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm")
     @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")
     LocalDateTime dateTimeOfReady;
     DeliveryRequest deliveryRequest;

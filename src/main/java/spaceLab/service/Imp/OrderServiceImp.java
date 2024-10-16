@@ -6,8 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import spaceLab.entity.Customer;
 import spaceLab.entity.Order;
 import spaceLab.entity.OrderItem;
+import spaceLab.mapper.DeliveryMapper;
 import spaceLab.mapper.OrderMapper;
 import spaceLab.model.order.request.OrderItemRequest;
 import spaceLab.model.order.request.OrderRequest;
@@ -18,6 +20,7 @@ import spaceLab.service.OrderItemService;
 import spaceLab.service.OrderService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +35,7 @@ public class OrderServiceImp implements OrderService {
     private final OrderRepository orderRepository;
     private final DeliveryService deliveryService;
     private final OrderItemService orderItemService;
+    private final DeliveryMapper deliveryMapper;
 
     @Override
     public Order getOrder(Long id) {
@@ -43,11 +47,6 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
-    }
-
-    @Override
     public OrderResponse getOrderResponse(Long id) {
         log.info("Fetching Order Response by id: {}", id);
         Order order = getOrder(id);
@@ -56,26 +55,7 @@ public class OrderServiceImp implements OrderService {
         return orderResponse;
     }
 
-    @Override
-    public void updateOrderFromOrderRequest(OrderRequest orderRequest) {
-        Order order = getOrder(orderRequest.getId());
-        order.setDateTimeOfReady(orderRequest.getDateTimeOfReady());
-        order.setPayment(orderRequest.getPayment());
-        order.setStatus(orderRequest.getStatus());
-        orderRepository.save(order);
-        log.info("Order with id {} updated successfully", order.getId());
-    }
 
-    @Override
-    public OrderResponse saveOrderFromOrderRequest(OrderRequest orderRequest) {
-        if (orderRequest.getId() != null) {
-            Order existingOrder = getOrder(orderRequest.getId());
-            return orderMapper.orderToOrderResponse(updateOrder(existingOrder, orderRequest));
-        } else {
-            Order newOrder = createOrder(orderRequest);
-            return orderMapper.orderToOrderResponse(orderRepository.save(newOrder));
-        }
-    }
 
     @Override
     public OrderResponse reorder(Long id) {
@@ -94,6 +74,36 @@ public class OrderServiceImp implements OrderService {
         return orderMapper.orderToOrderResponse(orderRepository.save(newOrder));
     }
 
+
+    @Override
+    public void updateOrderFromOrderRequest(OrderRequest orderRequest) {
+        Order order = getOrder(orderRequest.getId());
+        order.setDateTimeOfReady(orderRequest.getDateTimeOfReady());
+        order.setPayment(orderRequest.getPayment());
+        order.setStatus(orderRequest.getStatus());
+        orderRepository.save(order);
+        log.info("Order with id {} updated successfully", order.getId());
+    }
+
+    @Override
+    public OrderResponse saveOrderFromOrderRequest(OrderRequest orderRequest, Customer customer) {
+        if (orderRequest.getId() != null) {
+            Order existingOrder = getOrder(orderRequest.getId());
+            double totalAmount = existingOrder.getOrderItems().stream()
+                    .mapToDouble(OrderItem::getTotalAmount)
+                    .sum();
+            existingOrder.setTotalAmount(totalAmount);
+            return orderMapper.orderToOrderResponse(updateOrder(existingOrder, orderRequest));
+        } else {
+            Order newOrder = createOrder(orderRequest, customer);
+            double totalAmount = newOrder.getOrderItems().stream()
+                    .mapToDouble(OrderItem::getTotalAmount)
+                    .sum();
+            newOrder.setTotalAmount(totalAmount);
+            return orderMapper.orderToOrderResponse(orderRepository.save(newOrder));
+        }
+    }
+
     @Override
     public Page<OrderResponse> getOrdersByCustomerIdPage(Long customerId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -102,6 +112,10 @@ public class OrderServiceImp implements OrderService {
     }
 
     private Order updateOrder(Order existingOrder, OrderRequest orderRequest) {
+        List<OrderItemRequest> orderItemRequests = orderRequest.getOrderItemRequests();
+        if (orderItemRequests == null) {
+            orderItemRequests = new ArrayList<>();
+        }
         applyOrderRequestToOrder(existingOrder, orderRequest);
 
         Order savedOrder = orderRepository.save(existingOrder);
@@ -114,13 +128,13 @@ public class OrderServiceImp implements OrderService {
         List<OrderItem> currentOrderItems = savedOrder.getOrderItems();
 
         List<OrderItem> itemsToRemove = currentOrderItems.stream()
-                .filter(item -> !updatedOrderItemIds.contains(item.getId()))
-                .collect(Collectors.toList());
+                .filter(item -> !updatedOrderItemIds.contains(item.getId())).collect(Collectors.toList());
 
         if (!itemsToRemove.isEmpty()) {
             savedOrder.getOrderItems().removeAll(itemsToRemove);
             boolean deletedNonexistent = orderItemService.deleteAll(itemsToRemove);
         }
+
 
         List<OrderItem> orderItems = orderRequest.getOrderItemRequests().stream()
                 .map(orderItemRequest -> orderItemService.saveOrderItem(orderItemRequest, savedOrder))
@@ -131,11 +145,16 @@ public class OrderServiceImp implements OrderService {
     }
 
 
-    private Order createOrder(OrderRequest orderRequest) {
+    private Order createOrder(OrderRequest orderRequest, Customer customer) {
+
         Order newOrder = new Order();
+        newOrder.setCustomer(customer);
+        newOrder = orderRepository.save(newOrder);
+
         applyOrderRequestToOrder(newOrder, orderRequest);
+        Order finalNewOrder = newOrder;
         List<OrderItem> orderItems = orderRequest.getOrderItemRequests().stream()
-                .map(orderItemRequest -> orderItemService.saveOrderItem(orderItemRequest, newOrder))
+                .map(orderItemRequest -> orderItemService.saveOrderItem(orderItemRequest, finalNewOrder))
                 .collect(Collectors.toList());
         newOrder.setOrderItems(orderItems);
         return newOrder;
@@ -144,8 +163,9 @@ public class OrderServiceImp implements OrderService {
     private void applyOrderRequestToOrder(Order order, OrderRequest orderRequest) {
         order.setDateTimeOfCreate(orderRequest.getDateTimeOfCreate());
         order.setDateTimeOfReady(orderRequest.getDateTimeOfReady());
+
         if (orderRequest.getDeliveryRequest() != null) {
-            order.setDelivery(deliveryService.saveDelivery(orderRequest.getDeliveryRequest()));
+            order.setDelivery(deliveryService.saveDelivery(order, orderRequest.getDeliveryRequest()));
         } else {
             order.setDelivery(null);
         }

@@ -8,6 +8,7 @@ import spaceLab.mapper.CategoryMapper;
 import spaceLab.model.category.CategoryResponse;
 import spaceLab.repository.CategoryRepository;
 import spaceLab.service.CategoryService;
+import spaceLab.specification.CategorySpecification;
 
 import java.util.List;
 
@@ -32,7 +33,8 @@ public class CategoryServiceImp implements CategoryService {
     public List<Category> getAllCategory() {
         log.info("Fetching all categories");
         try {
-            List<Category> categories = categoryRepository.findAll();
+            List<Category> categories = categoryRepository.findAll(CategorySpecification.byNotDeleted()
+                    .and(CategorySpecification.byStatus(Category.Status.ACTIVE)));
             log.info("Successfully fetched {} categories", categories.size());
             return categories;
         } catch (Exception e) {

@@ -4,12 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import spaceLab.entity.Delivery;
+import spaceLab.entity.Order;
 import spaceLab.model.delivery.DeliveryRequest;
 import spaceLab.repository.DeliveryRepository;
 import spaceLab.service.CityService;
 import spaceLab.service.DeliveryService;
+import spaceLab.specification.DeliverySpecification;
 
 import java.util.List;
 
@@ -23,17 +26,15 @@ public class DeliveryServiceImp implements DeliveryService {
     private final CityService cityService;
 
 
-
     @Override
-    public Delivery saveDelivery(DeliveryRequest deliveryDto) {
+    public Delivery saveDelivery(Order order, DeliveryRequest deliveryDto) {
         if (deliveryDto.getId() != null) {
-            // Обновление существующей доставки
             return deliveryRepository.findById(deliveryDto.getId())
                     .map(existingDelivery -> updateDelivery(existingDelivery, deliveryDto))
                     .orElseThrow(() -> new RuntimeException("Delivery not found with id: " + deliveryDto.getId()));
         } else {
-            // Создание новой доставки
             Delivery newDelivery = createDelivery(deliveryDto);
+            newDelivery.setOrder(order);
             return saveDelivery(newDelivery);
         }
     }
@@ -100,7 +101,8 @@ public class DeliveryServiceImp implements DeliveryService {
 
     @Override
     public Page<Delivery> findDeliveriesByRequest(int page, int pageSize, String search) {
-        return null;
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return deliveryRepository.findAll(DeliverySpecification.search(search), pageable);
     }
 
     @Override

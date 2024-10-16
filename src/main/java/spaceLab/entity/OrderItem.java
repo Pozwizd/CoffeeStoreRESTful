@@ -33,18 +33,4 @@ public class OrderItem {
 
     private double totalAmount;
 
-    @PrePersist
-    @PreUpdate
-    @PostPersist
-    @PostConstruct
-    @PostLoad
-    public void updateTotalAmount() {
-        this.totalAmount = orderItemAttributes.stream()
-                .mapToDouble(attr -> {
-                    Double priceWithDiscount = Optional.ofNullable(attr.getPrice()).orElse(0.0);
-                    double price = (priceWithDiscount != 0.0) ? priceWithDiscount : attr.getAttributeValue().getPrice();
-                    return price * quantity;
-                })
-                .sum();
-    }
 }

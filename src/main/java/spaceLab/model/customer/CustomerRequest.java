@@ -18,7 +18,7 @@ public class CustomerRequest {
     private Long id;
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max=25, message = "Размер поля должен быть не более 25 символов")
-    @Schema(example = "Гусь")
+    @Schema(example = "Аркадий")
     private String name;
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max=13, message = "Размер номера должен быть не более 13 символов")

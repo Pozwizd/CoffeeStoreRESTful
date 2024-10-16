@@ -7,15 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.*;
 
 @Constraint(validatedBy = EmailUniqueValidator.class)
-@Target({TYPE})
+@Target({TYPE, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EmailUnique {
-    String id();
-    String email();
-    String message() default "Такай адрес электронной почты уже зарегистрирован";
+    String message() default "Такай адрес электронной почты уже используется";
 
     Class<?>[] groups() default {};
 

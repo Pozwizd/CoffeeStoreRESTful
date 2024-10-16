@@ -69,16 +69,16 @@ public class Order {
         CARD
     }
 
-    @PrePersist
-    @PreUpdate
-    @PostPersist
-    @PostConstruct
-    @PostLoad
-    public void updateTotalAmount() {
-        this.totalAmount = orderItems.stream()
-                .mapToDouble(OrderItem::getTotalAmount)
-                .sum();
-    }
+//    @PrePersist
+//    @PreUpdate
+//    @PostPersist
+//    @PostConstruct
+//    @PostLoad
+//    public void updateTotalAmount() {
+//        this.totalAmount = orderItems.stream()
+//                .mapToDouble(OrderItem::getTotalAmount)
+//                .sum();
+//    }
 
     @Override
     public final boolean equals(Object o) {

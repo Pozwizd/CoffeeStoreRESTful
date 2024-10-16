@@ -2,6 +2,7 @@ package spaceLab.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import spaceLab.entity.Customer;
 import spaceLab.entity.Order;
 import spaceLab.model.order.request.OrderRequest;
 import spaceLab.model.order.response.OrderResponse;
@@ -16,11 +17,9 @@ public interface OrderService {
 
     public OrderResponse getOrderResponse(Long id);
 
-    public List<Order> getAllOrders();
-
     public void updateOrderFromOrderRequest(OrderRequest orderRequest);
 
-    OrderResponse saveOrderFromOrderRequest(OrderRequest orderRequest);
+    OrderResponse saveOrderFromOrderRequest(OrderRequest orderRequest, Customer customer);
 
     OrderResponse reorder(Long id);
 

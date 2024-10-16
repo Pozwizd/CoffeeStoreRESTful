@@ -15,7 +15,7 @@ public @interface OldPasswordMatching {
     String id();
     String oldPassword();
 
-    String message() default "Неправильний пароль";
+    String message() default "Неправильный пароль";
 
     Class<?>[] groups() default {};
 

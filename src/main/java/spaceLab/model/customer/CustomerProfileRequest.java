@@ -9,11 +9,11 @@ import lombok.Data;
 import spaceLab.entity.Language;
 import spaceLab.validation.confirmPassword.PasswordMatching;
 import spaceLab.validation.emailValidation.EmailUnique;
-import spaceLab.validation.newPasswordValidation.NewPasswordValid;
 import spaceLab.validation.notEmptyPasswordValidation.NotEmptyOldPassword;
 import spaceLab.validation.phoneNumberValidation.PhoneNumberUnique;
 import spaceLab.validation.validateOldPassword.OldPasswordMatching;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @PasswordMatching(
@@ -26,10 +26,7 @@ import java.time.LocalDate;
         oldPassword = "oldPassword",
         message = "Неверный пароль"
 )
-@EmailUnique(
-        id = "id",
-        email = "email"
-)
+@EmailUnique
 @PhoneNumberUnique(
         id = "id",
         phoneNumber = "phoneNumber"
@@ -39,7 +36,7 @@ import java.time.LocalDate;
         newPassword = "newPassword"
 )
 @Data
-public class CustomerProfileRequest {
+public class CustomerProfileRequest implements Serializable {
     @Schema(example = "1")
     private Long id;
     @NotEmpty(message = "Поле не может быть пустым")
@@ -57,13 +54,13 @@ public class CustomerProfileRequest {
     @Schema(example = "user@example.com")
     private String email;
     @Schema(example = "1975-01-01")
-    private LocalDate birthDate;
+    private LocalDate dateOfBirth;
     private Language language;
-    @Size(max = 100, message = "Размер поля должен быть не более 100 символов")
+    @Size(min = 3, max = 100, message = "Размер поля должен быть не более 100 символов")
     @Schema(example = "password")
     private String oldPassword;
     @Size(max = 100, message = "Размер поля должен быть не более 100 символов")
-    @NewPasswordValid
+    @Pattern(regexp = "^.{8,}$", message = "Пароль должен содержать минимум 8 символов")
     @Schema(example = "password")
     private String newPassword;
     @Size(max = 100, message = "Размер поля должен быть не более 100 символов")

@@ -23,8 +23,6 @@ public class CustomerResponse {
     @Schema(example = "2000-02-15")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    @Schema(example = "Street 1, City, Country")
-    private String address;
     @Schema(example = "+380123456789")
     private String phoneNumber;
     @Schema(example = "RU")

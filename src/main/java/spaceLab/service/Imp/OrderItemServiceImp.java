@@ -3,6 +3,7 @@ package spaceLab.service.Imp;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import spaceLab.service.ProductService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,14 +94,15 @@ public class OrderItemServiceImp implements OrderItemService {
 
     @Override
     public boolean deleteAll(List<OrderItem> itemsToRemove) {
-        try {
-            orderItemRepository.deleteAll(itemsToRemove);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (itemsToRemove == null || itemsToRemove.isEmpty()) {
+            System.out.println("Список для удаления пуст или равен null");
             return false;
         }
+        orderItemRepository.deleteAll(itemsToRemove);
+        return true;
+
     }
+
 
     private OrderItem createNewOrderItem(OrderItemRequest orderItemDto, Order savedOrder) {
         OrderItem orderItem = new OrderItem();

@@ -57,72 +57,33 @@ public class AuthenticationController {
 
 
 
-    @Operation(summary = "Generate invite link", description = "Generates a permanent invite link for the customer")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", schema = @Schema())}),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {@Content(mediaType = "application/json", schema = @Schema())}),
-            @ApiResponse(responseCode = "400", description = "Bad request", content = {@Content(mediaType = "application/json", schema = @Schema())})
-    })
-    @GetMapping("/generateInviteLink")
-    public ResponseEntity<String> generateInviteLink(HttpServletRequest request) {
-        // Получаем текущего аутентифицированного пользователя
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-
-        // Ищем пользователя по email
-        Customer inviter = customerService.getCustomerByEmail(email);
-
-        // Проверяем, есть ли уже активная ссылка для этого пользователя
-        Invitation invitation = invitationService.findByInviterAndIsActive(inviter, true);
-        if (invitation == null) {
-            // Если нет, создаем новую
-            invitation = new Invitation();
-            invitation.setInviteCode(UUID.randomUUID().toString());  // Генерация кода приглашения
-            invitation.setInviter(inviter);
-            invitation.setActive(true);
-            invitationService.saveInvitation(invitation);
-        }
-
-        // Формируем постоянную ссылку
-        String inviteLink = request.getRequestURL().toString().replace("/generateInviteLink", "/register?inviteCode=") + invitation.getInviteCode();
-
-        // Возвращаем ссылку
-        return new ResponseEntity<>(inviteLink, HttpStatus.OK);
-    }
-
-
-
-
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registerCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
-        // Проверяем код приглашения
-        Invitation invitation = invitationService.validateInvitationCode(customerRequest.getToken());
-        if (invitation == null || !invitation.isActive()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Неверный или неактивный код
-        }
-
-        // Выполняем регистрацию
+    @Operation(summary = "Customer registration", description = "Register new Customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticationResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Failed validation", content = {@Content(mediaType = "application/json", schema = @Schema())})
+    })
+    public ResponseEntity<AuthenticationResponse> registerCustomer(
+            @Valid @RequestBody CustomerRequest customerRequest,
+            @RequestParam(name = "inviteCode", required = false) String inviteCode) {
         AuthenticationResponse response = authenticationService.register(customerRequest);
+        if (inviteCode != null) {
+            Invitation invitation = invitationService.validateInvitationCode(inviteCode);
 
-        // Привязываем нового пользователя к приглашению
-        invitation.getInvitedCustomers().add(customerService.getCustomerByEmail(customerRequest.getEmail()));
-        invitationService.saveInvitation(invitation);
-
+            invitation.getInvitedCustomers().add(customerService.getCustomerByEmail(customerRequest.getEmail()));
+            Invitation invite = invitationService.saveInvitation(invitation);
+        }
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-
-    @Operation(summary = "Customer authentication",
-            description = "Authenticate Customer"
-    )
+    @PostMapping("/login")
+    @Operation(summary = "Customer authentication", description = "Authenticate Customer")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",content = {@Content(mediaType = "application/json",schema = @Schema(implementation = AuthenticationResponse.class))}),
             @ApiResponse(responseCode = "403", description = "Wrong email or password",content = {@Content(mediaType = "application/json",schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "Failed validation",content = {@Content(mediaType = "application/json",schema = @Schema())})})
-    @SecurityRequirement(name = "")
-    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest authenticationRequest){
-        return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
+            return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
     }
 
     @Operation(summary = "Refresh access token",description = "Get new access token by refresh token")
@@ -154,6 +115,7 @@ public class AuthenticationController {
         mailService.sendToken(token,emailRequest.getEmail(),httpRequest);
         return new ResponseEntity<>(new PasswordResetTokenResponse(token),HttpStatus.OK);
     }
+
     @Operation(summary = "Change password", description = "Set new password after customer received email with password reset token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",content = {@Content(mediaType = "application/json")}),

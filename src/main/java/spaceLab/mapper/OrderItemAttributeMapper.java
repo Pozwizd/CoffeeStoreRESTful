@@ -10,5 +10,6 @@ public interface OrderItemAttributeMapper {
 
     @Mapping(source = "attributeProduct.id", target = "productAttributeId")
     @Mapping(source = "attributeValue.id", target = "attributeValueId")
+    @Mapping(source = "orderItem.id", target = "orderItemId")
     OrderItemAttributeResponse orderItemAttributeToOrderItemAttributeResponse(OrderItemAttribute orderItemAttribute);
 }

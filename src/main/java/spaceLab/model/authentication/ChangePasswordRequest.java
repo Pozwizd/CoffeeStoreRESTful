@@ -24,12 +24,12 @@ public class ChangePasswordRequest {
             @Pattern(regexp = ".*[,./?]+.*", message = "Пароль должен содержать хотя бы одну цифру, одну заглавную букву, один спецсимвол ,./? и быть длиной более 8 символов"),
             @Pattern(regexp = ".*[A-Z]+.*", message = "Пароль должен содержать хотя бы одну цифру, одну заглавную букву, один спецсимвол ,./? и быть длиной более 8 символов")
     })
-    @Schema(example = "admin", required = true)
+    @Schema(example = "admin")
     private String newPassword;
 
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max=100, message = "Размер поля должен быть не более 100 символов")
-    @Schema(example = "admin", required = true)
+    @Schema(example = "admin")
     private String confirmNewPassword;
 
 

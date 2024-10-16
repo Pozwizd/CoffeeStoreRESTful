@@ -33,12 +33,12 @@ public class LocationServiceImp implements LocationService {
 
     @Override
     public Location getLocation(Long id) {
-        return null;
+        return locationRepository.findById(id).orElse(null);
     }
 
     @Override
     public LocationResponse getLocationResponse(Long id) {
-        return null;
+        return locationMapper.locationToLocationResponse(getLocation(id));
     }
 
     @Override

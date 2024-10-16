@@ -13,7 +13,7 @@ public class EmailRequest {
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max=100, message = "Размер поля должен быть не более 50 символов")
     @Email(regexp = "[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\\.[a-z]{2,3}", message = "Неверный формат email")
-    @Schema(example = "user@example.com", required = true)
+    @Schema(example = "user@example.com")
     private String email;
 
 }

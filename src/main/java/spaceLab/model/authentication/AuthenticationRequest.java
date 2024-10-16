@@ -9,10 +9,10 @@ import lombok.Setter;
 @Getter
 public class AuthenticationRequest {
     @NotEmpty(message = "Поле не может быть пустым")
-    @Schema(example = "darin.senger@yahoo.com")
+    @Schema(example = "customer@gmail.com")
     private String email;
     @NotEmpty(message = "Поле не может быть пустым")
-    @Schema(example = "054yx8i9aqm8920")
+    @Schema(example = "customer")
     private String password;
 
 }

@@ -1,11 +1,14 @@
 package spaceLab.service.Imp;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.query.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import spaceLab.entity.City;
 import spaceLab.repository.CityRepository;
 import spaceLab.service.CityService;
+import spaceLab.specification.CitySpecification;
 
 import java.util.List;
 
@@ -41,8 +44,8 @@ public class CityServiceImp implements CityService  {
     }
 
     @Override
-    public Page findAllCities(int page, int pageSize) {
-        return null;
+    public Page<City> findAllCities(int page, int pageSize) {
+        return cityRepository.findAll(PageRequest.of(page, pageSize));
     }
 
     @Override
@@ -56,8 +59,9 @@ public class CityServiceImp implements CityService  {
     }
 
     @Override
-    public Page findCitiesByRequest(int page, int pageSize, String search) {
-        return null;
+    public Page<City> findCitiesByRequest(int page, int pageSize, String search) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return cityRepository.findAll(CitySpecification.search(search), pageable);
     }
 
     @Override

@@ -1,4 +1,6 @@
 server:
+#  servlet:
+#    context-path: /
   port: 8082
 spring:
 
@@ -6,7 +8,7 @@ spring:
   application:
     name: CoffeeApp
   datasource:
-    url: jdbc:mysql://localhost:3306/CoffeeApp5?createDatabaseIfNotExist=true
+    url: jdbc:mysql://slj.demodev.cc:3310/CoffeeAppMiahkykh?createDatabaseIfNotExist=true
     username: root
     password: "0000"
   jpa:
@@ -26,3 +28,13 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+
+jwt:
+  secret:
+    key: zX1P4jRW7kF2yG9LhZ6V3mN8qX4aQ5bC0rT3nU7vW1yX8fL2mB5dH9eJ6sP0tA1X
+  token:
+    access:
+      expiration: 86400000
+    refresh:
+      expiration: 604800000

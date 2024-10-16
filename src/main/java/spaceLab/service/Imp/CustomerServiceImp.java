@@ -27,9 +27,12 @@ public class CustomerServiceImp implements CustomerService {
             customer1.setEmail(customerRequest.getEmail());
             customer1.setName(customerRequest.getName());
             customer1.setPhoneNumber(customerRequest.getPhoneNumber());
-            customer1.setPassword(passwordEncoder.encode(customerRequest.getNewPassword()));
             customer1.setLanguage(customerRequest.getLanguage());
-            customer1.setDateOfBirth(customerRequest.getBirthDate());
+            if(passwordEncoder.encode(customer1.getPassword()).equals(customerRequest.getOldPassword())){
+                if (customerRequest.getNewPassword().equals(customerRequest.getConfirmNewPassword())){
+                    customer1.setPassword(passwordEncoder.encode(customerRequest.getNewPassword()));
+                }
+            }
             customerRepository.save(customer1);
             return customer1;
         }).orElse(null);
@@ -48,7 +51,7 @@ public class CustomerServiceImp implements CustomerService {
 
     @Override
     public CustomerResponse getCustomerResponseByEmail(String email) {
-        return null;
+        return customerMapper.customerToCustomerResponse(getCustomerByEmail(email));
     }
 
 }

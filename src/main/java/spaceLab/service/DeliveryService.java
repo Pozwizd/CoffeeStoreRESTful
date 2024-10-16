@@ -3,6 +3,7 @@ package spaceLab.service;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import spaceLab.entity.Delivery;
+import spaceLab.entity.Order;
 import spaceLab.model.delivery.DeliveryRequest;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.List;
 @Service
 public interface DeliveryService {
 
-    public Delivery saveDelivery(Delivery delivery);
 
-    public Delivery saveDelivery(DeliveryRequest delivery);
+
+    Delivery saveDelivery(Order order, DeliveryRequest deliveryDto);
+
+    Delivery saveDelivery(Delivery delivery);
 
     public Delivery getDelivery(Long id);
 

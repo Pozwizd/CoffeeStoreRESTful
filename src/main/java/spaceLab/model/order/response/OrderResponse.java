@@ -28,7 +28,7 @@ public class OrderResponse implements Serializable {
     LocalDateTime dateTimeOfReady;
 
     DeliveryResponse deliveryDto;
-    List<OrderItemResponse> orderItemsDto;
+    List<OrderItemResponse> orderItems;
 
     Order.Payment payment;
     Order.OrderStatus status;
