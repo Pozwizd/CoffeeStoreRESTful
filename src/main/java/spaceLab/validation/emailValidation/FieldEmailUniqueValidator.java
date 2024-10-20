@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import spaceLab.service.CustomerService;
 
-public class FieldEmailUniqueValidator implements ConstraintValidator<FieldEmailUnique,String> {
+public class FieldEmailUniqueValidator implements ConstraintValidator<FieldEmailUnique, String> {
     private final CustomerService customerService;
 
     public FieldEmailUniqueValidator(CustomerService customerService) {
@@ -12,7 +12,7 @@ public class FieldEmailUniqueValidator implements ConstraintValidator<FieldEmail
     }
 
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return customerService.getCustomerByEmail(s) == null;
+    public boolean isValid(String email, ConstraintValidatorContext context) {
+        return customerService.getCustomerByEmail(email) == null;
     }
 }

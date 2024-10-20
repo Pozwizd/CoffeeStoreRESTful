@@ -24,22 +24,17 @@ public class CustomerRequest {
     @Size(max=13, message = "Размер номера должен быть не более 13 символов")
     @Pattern(regexp = "\\+380(50|66|95|99|67|68|96|97|98|63|93|73)[0-9]{7}", message = "Неверный формат номера")
     @FieldPhoneUnique
-    @Schema(example = "+380124567890")
+    @Schema(example = "+380664567890")
     private String phoneNumber;
     @NotEmpty(message = "Поле не может быть пустым")
     @Size(max=100, message = "Размер поля должен быть не более 50 символов")
     @Email(regexp = "[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\\.[a-z]{2,3}", message = "Неверный формат email")
     @FieldEmailUnique
-    @Schema(example = "user@example.com")
+    @Schema(example = "customer@gmail.com")
     private String email;
     @Size(max=100, message = "Размер поля должен быть не более 100 символов")
-    @Pattern.List({
-            @Pattern(regexp = ".{8,}", message = "Пароль должен содержать по крайней мере одну цифру, одну заглавную букву, один спецсимвол ,./? и размер больше 8"),
-            @Pattern(regexp = ".*\\d+.*", message = "Пароль должен содержать по крайней мере одну цифру, одну заглавную букву, один спецсимвол ,./? и размер больше 8"),
-            @Pattern(regexp = ".*[,./?]+.*", message = "Пароль должен содержать по крайней мере одну цифру, одну заглавную букву, один спецсимвол ,./? и размер больше 8"),
-            @Pattern(regexp = ".*[A-Z]+.*", message = "Пароль должен содержать по крайней мере одну цифру, одну заглавную букву, один спецсимвол ,./? и размер больше 8")
-    })
-    @Schema(example = "admin")
+    @Pattern(regexp = "^(?=.*[\\W]).{8,}$", message = "Пароль должен содержать хотя бы 8 символов и один спецсимвол")
+    @Schema(example = "customer")
     private String password;
 
 
