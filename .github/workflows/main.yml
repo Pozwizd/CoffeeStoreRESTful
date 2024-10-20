@@ -1,7 +1,7 @@
 name: Build and push CoffeeAppRest image and restart containers
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "main" ]
 jobs:
   build:
     runs-on: ubuntu-latest
